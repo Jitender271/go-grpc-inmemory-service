@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+option go_package = "moviepb/";
+import "proto/movie.proto";
+import "proto/google/api/annotations.proto";
+
+message MovieRequest{
+    string movie = 1;
+    string genre = 2;
+    string desc = 3;
+    string rating = 4;
+}
+
+message MovieResponse{
+    MovieDetails movieDetails = 1;
+    MovieStatus status = 2;
+}
+
+message GetMovieRequest{
+    string movie = 1;
+}
+
+message GetMovieResponse{
+    MovieDetails movieDetails = 1;
+}
+
+message GetAllMoviesRequest{
+   string movies = 1;
+}
+
+message GetAllMoviesResponse{
+   repeated MovieDetails movieDetails = 1;
+}
+
+message UpdateMovieRequest{
+    string movie_id = 1;
+    string movie = 2;
+    string genre = 3;
+    string desc = 4;
+    string rating = 5;
+}
+
+message UpdateMovieResponse{
+    MovieDetails movieDetails = 1;
+    MovieStatus status = 2;
+}
+
+service MoviePlatform{
+    rpc CreateMovie(MovieRequest) returns (MovieResponse) {
+        option (google.api.http) = {
+            post: "/api/V1/create/movie"
+            body:  "*"
+        };
+    }
+    rpc GetMovie(GetMovieRequest) returns (GetMovieResponse) {
+        option (google.api.http) = {
+            post: "/api/V1/fetch/movie"
+            body:  "*"
+        };
+    }
+    rpc GetAllMovies(GetAllMoviesRequest) returns (GetAllMoviesResponse) {
+        option (google.api.http) = {
+            get: "/api/V1/get/all/movies"
+        };
+    }
+    rpc UpdateMovie(UpdateMovieRequest) returns (UpdateMovieResponse) {
+        option (google.api.http) = {
+            put: "/api/V1/update/movie"
+            body:  "*"
+        };
+    }
+}
