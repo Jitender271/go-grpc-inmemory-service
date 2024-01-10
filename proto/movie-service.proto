@@ -2,6 +2,7 @@ syntax = "proto3";
 
 option go_package = "moviepb/";
 import "proto/movie.proto";
+import "proto/booking.proto";
 import "proto/google/api/annotations.proto";
 
 message MovieRequest{
@@ -45,6 +46,26 @@ message UpdateMovieResponse{
     MovieStatus status = 2;
 }
 
+message BookingRequest{
+    string movie_name = 1;
+    string theatre_name = 2;
+}
+
+message BookingResponse{
+    BookingDetails bookingDetails = 1;
+    BookingStatus status = 2;
+}
+
+message GetBookingRequest{
+    string movie_name = 1;
+    string theatre_name = 2;
+}
+
+message GetBookingResponse{
+    repeated BookingDetails bookingDetails = 1;
+}
+
+
 service MoviePlatform{
     rpc CreateMovie(MovieRequest) returns (MovieResponse) {
         option (google.api.http) = {
@@ -66,6 +87,18 @@ service MoviePlatform{
     rpc UpdateMovie(UpdateMovieRequest) returns (UpdateMovieResponse) {
         option (google.api.http) = {
             put: "/api/V1/update/movie"
+            body:  "*"
+        };
+    }
+    rpc CreateBooking(BookingRequest) returns (BookingResponse) {
+        option (google.api.http) = {
+            post: "/api/V1/create/booking"
+            body:  "*"
+        };
+    }
+    rpc GetBookings(GetBookingRequest) returns (GetBookingResponse) {
+        option (google.api.http) = {
+            post: "/api/V1/fetch/bookings"
             body:  "*"
         };
     }

@@ -7,3 +7,16 @@ type Movie struct {
 	Desc   string
 	Rating string
 }
+
+type BookMyMovie struct {
+	Id          string
+	MovieName   string
+	TheatreName string
+	StartTime   int64
+	EndTime     int64
+}
+
+type GetBooking struct {
+	MovieName   string
+	TheatreName string
+}

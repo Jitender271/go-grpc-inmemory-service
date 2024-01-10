@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "moviepb/";
+
+message BookingDetails {
+  string id = 1;
+  string movie_name = 2;
+  string theatre_name = 3;
+  string start_time = 4;
+  string end_time = 5;
+}
+
+enum BookingStatus {
+  CREATED_BOOKING = 0;
+  UPDATED_BOOKING = 1;
+  FAILED_BOOKING = 2;
+  DUPLICATE_ENTRY_BOOKING = 3;
+}

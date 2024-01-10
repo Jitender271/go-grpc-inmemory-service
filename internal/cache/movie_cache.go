@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/go-grpc-inmemory-service/internal/cache/localcache"
 	"github.com/go-grpc-inmemory-service/internal/config"
 	"github.com/go-grpc-inmemory-service/internal/dao"
@@ -49,6 +50,7 @@ func NewMovieCacheService(cacheConfigs config.AppConfig, movieDao dao.MovieDao) 
 }
 
 func reloadMovieValues(ctx context.Context, movieDao dao.MovieDao) (interface{}, error) {
+	fmt.Print("====inside reload====")
 	movie, err := movieDao.GetAllMovies(ctx)
 	if err != nil {
 		return nil, errors.New("error getting all movies from db")
@@ -68,5 +70,6 @@ func (m *MovieCacheImpl) GetAllConfigs(ctx context.Context, cacheKey string) ([]
 }
 
 func (m *MovieCacheImpl) DeleteMovieCacheKey(ctx context.Context) {
+	fmt.Print("delete data")
 	m.cache.Delete(ctx, all_movie_cache_key)
 }

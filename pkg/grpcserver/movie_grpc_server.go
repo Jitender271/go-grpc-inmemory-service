@@ -14,13 +14,15 @@ import (
 type MovieGrpcServer struct {
 	moviepb.UnimplementedMoviePlatformServer
 	service.MovieService
+	service.BookingService
 }
 
 func NewGrpcServer(server *grpc.Server) *MovieGrpcServer {
 	dbConfig := config.Configurations.DbConfigs
 	cacheConfig := config.Configurations
 	s := &MovieGrpcServer{
-		MovieService: service.NewMovieImpl(dbConfig, cacheConfig),
+		MovieService:   service.NewMovieImpl(dbConfig, cacheConfig),
+		BookingService: service.NewBookingImpl(dbConfig, cacheConfig),
 	}
 	moviepb.RegisterMoviePlatformServer(server.GrpcServer, s)
 	return s
@@ -46,8 +48,42 @@ func (m *MovieGrpcServer) CreateMovie(ctx context.Context, request *moviepb.Movi
 	}, nil
 }
 
+func (m *MovieGrpcServer) CreateBooking(ctx context.Context, request *moviepb.BookingRequest) (*moviepb.BookingResponse, error) {
+	bookingResponse, err := m.BookingService.CreateBooking(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	if bookingResponse == nil {
+		return &moviepb.BookingResponse{
+			Status: moviepb.BookingStatus_FAILED_BOOKING,
+		}, nil
+	}
+	if bookingResponse.Id == constants.EmptyString {
+		return nil, errors.New("err not captured but nil response received")
+	}
+
+	return &moviepb.BookingResponse{
+		BookingDetails: buildBooking(bookingResponse),
+		Status:         moviepb.BookingStatus_CREATED_BOOKING,
+	}, nil
+}
+
 func (m *MovieGrpcServer) GetMovie(ctx context.Context, request *moviepb.GetMovieRequest) (*moviepb.GetMovieResponse, error) {
 	getMovieResponse, err := m.MovieService.GetMovie(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	if getMovieResponse == nil {
+		return nil, errors.New("err not captured but nil response received")
+	}
+
+	return &moviepb.GetMovieResponse{
+		MovieDetails: buildMovie(getMovieResponse),
+	}, nil
+}
+
+func (m *MovieGrpcServer) GetBookings(ctx context.Context, request *moviepb.GetMovieRequest) (*moviepb.GetMovieResponse, error) {
+	getMovieResponse, err := m.BookingService.(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +125,6 @@ func (m *MovieGrpcServer) UpdateMovie(ctx context.Context, request *moviepb.Upda
 			Status: moviepb.MovieStatus_FAILED,
 		}, nil
 	}
-
 	return &moviepb.UpdateMovieResponse{
 		MovieDetails: buildMovie(updatedMovieResponse),
 		Status:       moviepb.MovieStatus_UPDATED,
@@ -103,5 +138,13 @@ func buildMovie(movie *models.Movie) *moviepb.MovieDetails {
 		Genre:       movie.Genre,
 		Description: movie.Desc,
 		Ratings:     movie.Rating,
+	}
+}
+
+func buildBooking(booking *models.BookMyMovie) *moviepb.BookingDetails {
+	return &moviepb.BookingDetails{
+		Id:          booking.Id,
+		MovieName:   booking.MovieName,
+		TheatreName: booking.TheatreName,
 	}
 }
